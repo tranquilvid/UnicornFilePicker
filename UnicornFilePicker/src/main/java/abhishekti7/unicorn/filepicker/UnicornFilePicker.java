@@ -66,7 +66,7 @@ public final class UnicornFilePicker {
             return;
         }
 
-        Intent intent = new Intent(activity, FilePickerActivity.class);
+        Intent intent = getPickerIntent(requestCode);
 
         Fragment fragment = getFragment();
         if(fragment==null){
@@ -74,6 +74,22 @@ public final class UnicornFilePicker {
         }else{
             fragment.startActivityForResult(intent, requestCode);
         }
+    }
+
+    /**
+     * Retrieve FilePicker Intent. Use this if the app is handling need the result
+     * through registerForActivityResult instead of onActivityResult
+     *
+     * @param requestCode Integer identity for Activity or Fragment request
+     */
+    @Nullable
+    public Intent getPickerIntent(int requestCode) {
+        Config.getInstance().setReqCode(requestCode);
+        Activity activity = getActivity();
+        if (activity == null) {
+            return null;
+        }
+        return new Intent(activity, FilePickerActivity.class);
     }
 
     public ConfigBuilder addConfigBuilder(){

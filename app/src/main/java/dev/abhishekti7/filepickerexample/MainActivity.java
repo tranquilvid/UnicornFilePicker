@@ -1,11 +1,14 @@
 package dev.abhishekti7.filepickerexample;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -29,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
             "android.permission.WRITE_EXTERNAL_STORAGE",
             "android.permission.READ_EXTERNAL_STORAGE",
     };
-
+    private ActivityResultLauncher<Intent> fileLauncherRequest;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,19 +46,31 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
 
+        fileLauncherRequest = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == Activity.RESULT_OK) {
+                Intent data = result.getData();
+                if (data != null) {
+                    ArrayList<String> files = data.getStringArrayListExtra("filePaths");
+                    for (String file : files) {
+                        Log.e(TAG, file);
+                    }
+                }
+            }
+        });
 
-        mainBinding.btnFilesDark.setOnClickListener((v)->{
-            UnicornFilePicker.from(MainActivity.this)
+        mainBinding.btnFilesDark.setOnClickListener((v) -> {
+            Intent pickerIntent = UnicornFilePicker.from(MainActivity.this)
                     .addConfigBuilder()
                     .selectMultipleFiles(true)
-                    .showOnlyDirectory(true)
+                    .showOnlyDirectory(false)
                     .setRootDirectory(Environment.getExternalStorageDirectory().getAbsolutePath())
                     .showHiddenFiles(false)
                     .setFilters(new String[]{"pdf", "png", "jpg", "jpeg"})
                     .addItemDivider(true)
                     .theme(R.style.UnicornFilePicker_Dracula)
                     .build()
-                    .forResult(Constants.REQ_UNICORN_FILE);
+                    .getPickerIntent(Constants.REQ_UNICORN_FILE);
+            fileLauncherRequest.launch(pickerIntent);
         });
 
         mainBinding.btnFilesLight.setOnClickListener((v)->{
@@ -110,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
                 Toast.makeText(MainActivity.this, "Permissions granted by the user.", Toast.LENGTH_SHORT).show();
