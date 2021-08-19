@@ -19,7 +19,7 @@ public class UnicornSimpleItemDecoration extends RecyclerView.ItemDecoration {
     private Drawable mDivider;
 
     public UnicornSimpleItemDecoration(Context context) {
-        this.mDivider = ContextCompat.getDrawable(context, R.drawable.unicorn_item_layout_divider);
+//        this.mDivider = ContextCompat.getDrawable(context, R.drawable.unicorn_item_layout_divider);
     }
 
     @Override

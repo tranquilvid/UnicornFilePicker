@@ -154,7 +154,7 @@ public class FilePickerActivity extends AppCompatActivity {
         filePickerBinding.rvFiles.setAdapter(directoryAdapter);
         directoryAdapter.notifyDataSetChanged();
         if(config.addItemDivider()){
-//            filePickerBinding.rvFiles.addItemDecoration(new UnicornSimpleItemDecoration(FilePickerActivity.this));
+            filePickerBinding.rvFiles.addItemDecoration(new UnicornSimpleItemDecoration(FilePickerActivity.this));
         }
     }
 
