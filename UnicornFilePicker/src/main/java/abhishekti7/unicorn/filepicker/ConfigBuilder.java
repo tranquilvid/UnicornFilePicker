@@ -1,23 +1,18 @@
 package abhishekti7.unicorn.filepicker;
 
-import android.app.Activity;
-import android.content.Intent;
-
 import androidx.annotation.StyleRes;
-import androidx.fragment.app.Fragment;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import abhishekti7.unicorn.filepicker.models.Config;
-import abhishekti7.unicorn.filepicker.ui.FilePickerActivity;
 
 /**
  * Created by Abhishek Tiwari on 09-01-2021.
  */
 public final class ConfigBuilder {
     private String rootDir;
+    private String preferredDir;
     private boolean showHidden = false;
     private boolean selectMultiple = false;
     private boolean addDivider = false;
@@ -70,7 +65,12 @@ public final class ConfigBuilder {
         return this;
     }
 
-    public UnicornFilePicker build(){
+    public ConfigBuilder setPreferredDirectory(String dirPath) {
+        this.preferredDir = dirPath;
+        return this;
+    }
+
+    public UnicornFilePicker build() {
         config.setRootDir(this.rootDir);
         config.setSelectMultiple(this.selectMultiple);
         config.setShowHidden(this.showHidden);
@@ -78,6 +78,7 @@ public final class ConfigBuilder {
         config.setAddItemDivider(this.addDivider);
         config.setThemeId(this.themeId);
         config.setShowOnlyDirectory(this.showOnlyDir);
+        config.setPreferredDirectory(this.preferredDir);
         return unicornFilePicker;
     }
 

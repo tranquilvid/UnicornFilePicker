@@ -13,6 +13,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
@@ -25,6 +26,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import abhishekti7.unicorn.filepicker.R;
 import abhishekti7.unicorn.filepicker.adapters.DirectoryAdapter;
@@ -59,6 +61,7 @@ public class FilePickerActivity extends AppCompatActivity {
     private Config config;
     private ArrayList<String> filters;
 
+    private DirectoryModel preferredDirectoryModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +78,8 @@ public class FilePickerActivity extends AppCompatActivity {
     private void initConfig() {
         filters = config.getExtensionFilters();
 
+        String preferredDirectory = config.getPreferredDirectory();
+        boolean isPreferredDirectoryChosen = preferredDirectory != null && !TextUtils.isEmpty(preferredDirectory);
 
         setSupportActionBar(filePickerBinding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -100,16 +105,23 @@ public class FilePickerActivity extends AppCompatActivity {
                     root_dir.lastModified(),
                     root_dir.listFiles() == null ? 0 : root_dir.listFiles().length
             ));
+
+            if (isPreferredDirectoryChosen) {
+                preferredDirectoryModel = getPreferredDirectory();
+            }
+            if (preferredDirectoryModel != null) {
+                fetchDirectory(preferredDirectoryModel);
+            }
         } else {
             Log.e(TAG, "Storage permissions not granted. You have to implement it before starting the file picker");
             finish();
         }
 
-        filePickerBinding.fabSelect.setOnClickListener((v)->{
+        filePickerBinding.fabSelect.setOnClickListener((v) -> {
             Intent intent = new Intent();
-            if(config.showOnlyDirectory()){
+            if (config.showOnlyDirectory()) {
                 selected_files.clear();
-                selected_files.add(arr_dir_stack.get(arr_dir_stack.size()-1).getPath());
+                selected_files.add(arr_dir_stack.get(arr_dir_stack.size() - 1).getPath());
             }
             intent.putStringArrayListExtra("filePaths", selected_files);
             setResult(config.getReqCode(), intent);
@@ -120,12 +132,26 @@ public class FilePickerActivity extends AppCompatActivity {
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = getTheme();
         theme.resolveAttribute(R.attr.unicorn_fabColor, typedValue, true);
-        if(typedValue.data!=0){
+        if (typedValue.data != 0) {
             filePickerBinding.fabSelect.setBackgroundTintList(ColorStateList.valueOf(typedValue.data));
-        }else{
+        } else {
             filePickerBinding.fabSelect.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.unicorn_colorAccent)));
         }
 
+    }
+
+    private DirectoryModel getPreferredDirectory() {
+        File preferredDirectory = new File(config.getPreferredDirectory());
+        if (preferredDirectory.isDirectory() && preferredDirectory.exists()) {
+            preferredDirectoryModel = new DirectoryModel(
+                    true,
+                    preferredDirectory.getAbsolutePath(),
+                    preferredDirectory.getName(),
+                    preferredDirectory.lastModified(),
+                    preferredDirectory.listFiles() == null ? 0 : preferredDirectory.listFiles().length
+            );
+        }
+        return preferredDirectoryModel;
     }
 
     private void setUpFilesView() {
@@ -139,13 +165,13 @@ public class FilePickerActivity extends AppCompatActivity {
 
             @Override
             public void onFileSelected(DirectoryModel fileModel) {
-                if(config.isSelectMultiple()){
-                    if(selected_files.contains(fileModel.getPath())){
+                if (config.isSelectMultiple()) {
+                    if (selected_files.contains(fileModel.getPath())) {
                         selected_files.remove(fileModel.getPath());
-                    }else{
+                    } else {
                         selected_files.add(fileModel.getPath());
                     }
-                }else{
+                } else {
                     selected_files.clear();
                     selected_files.add(fileModel.getPath());
                 }
@@ -153,9 +179,9 @@ public class FilePickerActivity extends AppCompatActivity {
         });
         filePickerBinding.rvFiles.setAdapter(directoryAdapter);
         directoryAdapter.notifyDataSetChanged();
-        if(config.addItemDivider()){
+//        if (config.addItemDivider()) {
 //            filePickerBinding.rvFiles.addItemDecoration(new UnicornSimpleItemDecoration(FilePickerActivity.this));
-        }
+//        }
     }
 
     private void setUpDirectoryStackView() {
@@ -196,9 +222,9 @@ public class FilePickerActivity extends AppCompatActivity {
                             directoryModel.setNum_files(file.listFiles().length);
                         arr_files.add(directoryModel);
                     } else {
-                        if(!config.showOnlyDirectory()){
+                        if (!config.showOnlyDirectory()) {
                             // Filter out files if filters specified
-                            if(filters!=null){
+                            if (filters != null) {
                                 try {
                                     // Extract the file extension
                                     String fileName = file.getName();
@@ -211,7 +237,7 @@ public class FilePickerActivity extends AppCompatActivity {
                                 } catch (Exception e) {
 //                                Log.e(TAG, "Encountered a file without an extension: ", e);
                                 }
-                            }else{
+                            } else {
                                 arr_files.add(directoryModel);
                             }
                         }

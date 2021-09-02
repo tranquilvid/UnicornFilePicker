@@ -19,6 +19,15 @@ public final class Config {
     private int reqCode;
     private boolean addItemDivider;
     private boolean showOnlyDirectory;
+    private String preferredDirectory;
+
+    public String getPreferredDirectory() {
+        return preferredDirectory;
+    }
+
+    public void setPreferredDirectory(String preferredDirectory) {
+        this.preferredDirectory = preferredDirectory;
+    }
 
     @StyleRes
     private int themeId;

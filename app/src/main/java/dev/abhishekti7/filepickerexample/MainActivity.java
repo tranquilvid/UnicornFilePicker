@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
                     .setFilters(new String[]{"pdf", "png", "jpg", "jpeg"})
                     .addItemDivider(true)
                     .theme(R.style.UnicornFilePicker_Dracula)
+                    .setPreferredDirectory("/storage/emulated/0/Download/")
                     .build()
                     .getPickerIntent(Constants.REQ_UNICORN_FILE);
             fileLauncherRequest.launch(pickerIntent);
